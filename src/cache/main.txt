@@ -1,0 +1,110 @@
+#include <Arduino.h>
+#include <HTTPClient.h>
+#include <lvgl.h>
+#include <TFT_eSPI.h>
+#define STASSID "CMCC-Xfak"
+#define STAPSK  "fsycpt2q"
+#define BLUETOOTH "TWS_p10 xsp"
+TFT_eSPI tft = TFT_eSPI(); /* TFT instance */
+static lv_disp_buf_t disp_buf;
+static lv_color_t buf[LV_HOR_RES_MAX * 10];
+lv_obj_t *btns[20];
+int mIndex = 0;
+bool isAct = true;
+struct music{
+    int id;
+    String name;  
+    String author;
+    String src;
+};
+music lists[20];
+/* Reading input device (simulated encoder here) */
+bool read_encoder(lv_indev_drv_t * indev, lv_indev_data_t * data)
+{
+    static int32_t last_diff = 0;
+    int32_t diff = 0; /* Dummy - no movement */
+    int btn_state = LV_INDEV_STATE_REL; /* Dummy - no press */
+
+    data->enc_diff = diff - last_diff;;
+    data->state = btn_state;
+
+    last_diff = diff;
+    
+    return false;
+}
+/* Display flushing */
+void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
+{
+    uint32_t w = (area->x2 - area->x1 + 1);
+    uint32_t h = (area->y2 - area->y1 + 1);
+
+    tft.startWrite();
+    tft.setAddrWindow(area->x1, area->y1, w, h);
+    tft.pushColors(&color_p->full, w * h, true);
+    tft.endWrite();
+    lv_disp_flush_ready(disp);
+}
+void lvgl_init(){
+    lv_init();
+    // #if USE_LV_LOG != 0
+    //     lv_log_register_print_cb(my_print); /* register print function for debugging */
+    // #endif
+
+    tft.begin(); /* TFT init */
+    tft.setRotation(1); /* Landscape orientation */
+
+    lv_disp_buf_init(&disp_buf, buf, NULL, LV_HOR_RES_MAX * 10);
+
+    lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv);
+    disp_drv.hor_res = 240;
+    disp_drv.ver_res = 240;
+    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.buffer = &disp_buf;
+    lv_disp_drv_register(&disp_drv);
+
+    lv_indev_drv_t indev_drv;
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.type = LV_INDEV_TYPE_ENCODER;
+    indev_drv.read_cb = read_encoder;
+    lv_indev_drv_register(&indev_drv);
+
+
+
+    lv_obj_t *list1 = lv_list_create(lv_scr_act(),NULL);
+    lv_obj_set_size(list1,240,240);
+    lv_obj_align(list1, NULL, LV_ALIGN_IN_TOP_MID, 0, 0);
+    for (size_t i = 0; i < 20; i++)
+    {
+        btns[i] = lv_list_add_btn(list1,LV_SYMBOL_AUDIO,lists[i].name.c_str());
+    }
+    lv_obj_t *keyboard = lv_keyboard_create(lv_scr_act(),NULL);
+    lv_keyboard_set_mode(keyboard,LV_KEYBOARD_MODE_TEXT_LOWER);
+    lv_obj_set_size(keyboard, 128,70);
+    lv_obj_set_hidden(keyboard,true);
+    lv_obj_align(keyboard, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
+}
+
+void setup() {
+    pinMode(25,OUTPUT);digitalWrite(25,HIGH);
+    pinMode(26,INPUT_PULLDOWN);digitalWrite(26,LOW);
+    pinMode(27,INPUT_PULLDOWN);digitalWrite(27,LOW);
+    pinMode(14,INPUT_PULLDOWN);digitalWrite(14,LOW);
+    Serial.begin(115200); /* prepare for possible serial debug */
+    delay(1000);
+    WiFi.disconnect();
+    WiFi.softAPdisconnect(true);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin("CMCC-Xfak","fsycpt2q");
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.println("...Connecting to WiFi");
+        delay(500);
+    }
+    lvgl_init();
+}
+
+void loop() {
+  lv_task_handler();
+  delay(40);
+  // put your main code here, to run repeatedly:
+} 
