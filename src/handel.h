@@ -3,8 +3,8 @@
 #include <httpApi.h>
 #include <TFT_eSPI.h>
 #ifndef STASSID
-#define STASSID "CMCC-Xfak"
-#define STAPSK  "fsycpt2q"
+#define STASSID "janxland"
+#define STAPSK  "88888888"
 #define BLUETOOTH "TWS_p10 xsp"
 #endif
 

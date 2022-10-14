@@ -51,7 +51,7 @@ lib_deps =
 
 ### 爬虫分析
 
-可以使用我的[JMusic](http://blog.janxland.xyz/v/blog/[Index (janxland.xyz)](/v/JMusic/#/))爬取网易云
+可以使用我的[JMusic](http://blog.janxland.xyz/v/blog/46)爬取网易云
 
 由于是在前端写的解密，后端再写就很麻烦了
 

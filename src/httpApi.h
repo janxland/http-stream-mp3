@@ -20,14 +20,17 @@ String GET(String path)
 
   if (httpCode < 0) {
     Serial.println("request error - " + httpCode);
+    Serial.println("error");
     return "error";
 
   }
 
   if (httpCode != HTTP_CODE_OK) {
+    Serial.println("NOT OK");
     return "NOT OK";
   }
   String response =  http.getString();
+  Serial.println(response);
   http.end();
   return response;
 }
@@ -54,20 +57,22 @@ String POST(String path,String body)
 
 String getUrl(String id){
 
-  DynamicJsonDocument doc(4096);
-  Serial.println("types=url&source=netease&id="+id);
-  deserializeJson(doc, POST("http://music.ytxmgy.com/api.php","types=url&source=netease&id="+id));
-  JsonObject list = doc.as<JsonObject>();
-  return list["url"].as<String>();
+  // DynamicJsonDocument doc(4096);
+  // deserializeJson(doc, POST("http://music.ytxmgy.com/api.php","types=url&source=netease&id="+id));
+  // JsonObject list = doc.as<JsonObject>();
+  // return list["url"].as<String>();
+  return id;
 }
 void pushMusic(String key,int page){
   DynamicJsonDocument doc(4096);
-  deserializeJson(doc, POST("http://music.ytxmgy.com/api.php","types=search&count=10&source=netease&pages=1&name="+key));
+  // deserializeJson(doc, POST("http://music.ytxmgy.com/api.php","types=search&count=10&source=netease&pages=1&name="+key));
+  deserializeJson(doc, GET("http://www.janxland.xyz/HTML/playlist"));  //用自己的测试json
   JsonArray list = doc.as<JsonArray>();
   for(int i=0;i<list.size();i++){
-    lists[i].id = list[i]["id"].as<String>();
+    // lists[i].id = list[i]["id"].as<String>();
+    lists[i].id = list[i]["url"].as<String>(); //自己的json数据无id 这里把id当成音频url
     lists[i].name = list[i]["name"].as<String>();
-    lists[i].author = list[i]["artist"][0].as<String>();
+    lists[i].author = list[i]["artist"].as<String>();
   }
   // String body = "_p=163&id=";
   // for(int i=0;i<10;i++){

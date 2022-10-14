@@ -11,11 +11,9 @@ void loop() {}
     #include <ESP8266WiFi.h>
 #endif
 #include "handel.h"
-
-#ifndef STASSID
 #define STASSID "janxland"
 #define STAPSK  "88888888"
-#endif
+
 
 void setup()
 {
